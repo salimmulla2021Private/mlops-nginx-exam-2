@@ -1,12 +1,20 @@
 import os
 import joblib
 import numpy as np
-
+from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from prometheus_fastapi_instrumentator import Instrumentator
 
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), 'model.joblib')
+print(f"Project root: {PROJECT_ROOT}")
+
+MODEL_PATH = (
+    PROJECT_ROOT
+    / "model"
+    / "model.joblib"
+)
 
 # Chargement du modèle entraîné
 try:
@@ -21,6 +29,8 @@ app = FastAPI(
     description="A simple API to predict if a text is coherent or just gibberish.",
     version="1.6.42-debug",
 )
+
+Instrumentator().instrument(app).expose(app)
 
 # modèle de données pour la requête d'entrée
 class Sentence(BaseModel):
@@ -47,7 +57,9 @@ def predict(features: Sentence):
 
         return {
             "prediction value": prediction[0],
-            "prediction_proba_dict": dict(zip(classes, prediction_proba.tolist()[0]))
+            "prediction_proba_dict": dict(zip(classes, prediction_proba.tolist()[0])),
+            "mode": "debug",
+            "api_version": "v2"
         }
 
     except Exception as e:

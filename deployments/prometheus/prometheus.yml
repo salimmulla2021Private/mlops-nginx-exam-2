@@ -4,5 +4,17 @@
     scrape_configs:
       - job_name: 'nginx-exporter'
         static_configs:
+          # Cible à scraper : l'exporter Nginx
           - targets: ['nginx_exporter:9113']
+
+      - job_name: "api-v1"
+        static_configs:
+          - targets:
+              - "mlops-nginx-exam:8000"
+
+      - job_name: "api-v2-debug"
+        static_configs:
+          - targets:
+              - "mlops-nginx-exam-debug:8007"
+    
     
